@@ -131,6 +131,10 @@ else:
             help="maximum number of records to download (default=100)",default=100)
 
     (options, args) = parser.parse_args()
+    
+    if options.tile!=None and options.sentinel!='S2':
+        print "The tile option (-t) can only be used for Sentinel-2"
+        sys.exit(-1)
 
     if options.lat==None or options.lon==None:
         if (options.latmin==None or options.lonmin==None or options.latmax==None or options.lonmax==None) and options.tile==None:
@@ -151,10 +155,6 @@ else:
         else:
             print "please choose between point and rectance, but not both"
             sys.exit(-1)
-            
-    if options.tile!=None and options.sentinel!='S2':
-        print "The tile option (-t) can only be used for Sentinel-2"
-        sys.exit(-1)
         
     parser.check_required("-a")    
     
