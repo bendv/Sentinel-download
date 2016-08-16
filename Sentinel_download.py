@@ -6,6 +6,7 @@ import os
 import optparse
 from xml.dom import minidom
 from datetime import date
+import pandas as pd
 
 ###########################################################################
 class OptionParser (optparse.OptionParser):
@@ -129,12 +130,19 @@ else:
     parser.add_option("-r",dest="MaxRecords",action="store",type="int",  \
             help="maximum number of records to download (default=100)",default=100)
 
-
     (options, args) = parser.parse_args()
+
     if options.lat==None or options.lon==None:
-        if options.latmin==None or options.lonmin==None or options.latmax==None or options.lonmax==None:
+        if (options.latmin==None or options.lonmin==None or options.latmax==None or options.lonmax==None) and options.tile==None:
             print "provide at least a point or  rectangle"
             sys.exit(-1)
+        elif (options.latmin==None or options.lonmin==None or options.latmax==None or options.lonmax==None) and options.tile!=None:
+            csv_file = "{0}/tile_centroids.csv".format( os.path.dirname(os.path.realpath(__file__)) )
+            tile_centroids = pd.read_csv(csv_file)
+            tile_subset = tile_centroids[ tile_centroids['tile'] == options.tile ]
+            options.lat = tile_subset['lat']
+            options.lon = tile_subset['lon']
+            geom = 'point'
         else:
             geom='rectangle'
     else:
@@ -143,6 +151,7 @@ else:
         else:
             print "please choose between point and rectance, but not both"
             sys.exit(-1)
+            
     if options.tile!=None and options.sentinel!='S2':
         print "The tile option (-t) can only be used for Sentinel-2"
         sys.exit(-1)
